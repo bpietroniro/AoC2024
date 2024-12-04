@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-
 def parse_input(filename):
     reports = []
 
@@ -11,6 +8,7 @@ def parse_input(filename):
     return reports
 
 
+# Part 1
 def is_safe(report):
     if report[1] == report[0]:
         return False
@@ -31,85 +29,59 @@ def find_total_safe(reports):
     return len([True for report in reports if is_safe(report)])
 
 
-def convert_report_to_distance_logs(report):
-    return [report[i] - report[i - 1] for i in range(1, len(report))]
+# Alternative approach to Part 1
+def convert_reports_to_distance_logs(report):
+    distance_logs = []
+    for report in reports:
+        distance_logs.append([report[i] - report[i - 1] for i in range(1, len(report))])
+
+    return distance_logs
 
 
-def is_safe_2(distance_log):
-    if distance_log[0] == 0:
+def is_safe_by_distance_log(log):
+    if log[0] == 0:
         return False
 
-    increasing = distance_log[0] > 0
+    increasing = log[0] > 0
 
     if increasing:
-        for d in distance_log:
+        for d in log:
             if d <= 0 or d > 3:
                 return False
     else:
-        for d in distance_log:
+        for d in log:
             if d >= 0 or d < -3:
                 return False
 
     return True
 
 
-def is_safe_pair(level1, level2):
-    return level1 != level2 and abs(level1 - level2) <= 3
+def find_total_safe_by_distance_logs(logs):
+    total = 0
+    for log in logs:
+        if is_safe_by_distance_log(log):
+            total += 1
+    return total
 
 
+# Part 2
 def is_safe_dampened(report):
     length = len(report)
+    if is_safe(report) or is_safe(report[1:]) or is_safe(report[: length - 1]):
+        return True
 
-    increasing = all([report[i] < report[i + 1] for i in range(length - 1)])
-    if increasing:
-        if report[0] - report[1] <= -4:
-            return is_safe(report[1:])
-        elif report[length - 2] - report[length - 1] <= -4:
-            return is_safe(report[: length - 1])
-        else:
-            return all([report[i] - report[i + 1] > -4 for i in range(1, length - 2)])
+    for i in range(1, length - 1):
+        if is_safe(report[:i] + report[i + 1 :]):
+            return True
 
-    decreasing = all([report[i] > report[i + 1] for i in range(length - 1)])
-    if decreasing:
-        if report[0] - report[1] >= 4:
-            return is_safe(report[1:])
-        elif report[length - 2] - report[length - 1] >= 4:
-            return is_safe(report[: length - 1])
-        else:
-            return all([report[i] - report[i + 1] < 4 for i in range(1, length - 2)])
-
-    if report[0] == report[1]:
-        return is_safe(report[1:])
-    if report[length - 2] == report[length - 1]:
-        return is_safe(report[: length - 1])
-
-    for i in range(len(report) - 2):
-        if report[i] == report[i + 1]:
-            return is_safe(report[:i] + report[i + 1 :]) or is_safe(
-                report[: i + 1] + report[i + 2 :]
-            )
+    return False
 
 
-def find_total_safe_2(distance_logs):
-    total = 0
-    for log in distance_logs:
-        if is_safe_2(log):
-            total += 1
-    return total
+def find_total_safe_dampened(reports):
+    return len([True for report in reports if is_safe_dampened(report)])
 
-
-def find_total_safe_dampened(reports, distance_logs):
-    total = 0
-    for i, log in enumerate(distance_logs):
-        if is_safe_dampened(log):
-            total += 1
-        else:
-            print(reports[i], " ", log)
-    return total
-
-
-# reports = parse_input("input.txt")
-# print(find_total_safe(reports))
 
 reports = parse_input("input.txt")
+print(find_total_safe(reports))
+print(find_total_safe_by_distance_logs(convert_reports_to_distance_logs(reports)))
 print(find_total_safe_dampened(reports))

@@ -129,4 +129,14 @@ Single-error cases where there's no salvaging it:
 
 Maybe a good way to do this would be to add some metadata during the Part 1 processing. We could track the index of the first error found.
 
-EDGE CASE: The first distance is negative but the rest or positive, or vice versa. How to handle this?
+Edge cases include pretty much any time the offending interval is between the first and second level in the report.
+
+...after a bunch of this kind of thinking and plenty of fussy little workarounds, decided to resign myself to brute force, essentially:
+
+### Algorithm
+
+1. If it's just plain safe, return True.
+2. If it's safe when you chop off the first or last level, return True.
+3. If it's safe if you splice out any other single level, return True.
+
+I still want a more efficient solution, but don't have time for it right now!
